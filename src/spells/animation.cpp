@@ -87,13 +87,13 @@ public:
 					QModelIndex iCtrlBlcks = kf.getIndex( iSeq, "Controlled Blocks" );
 
 					for ( int r = 0; r < kf.rowCount( iCtrlBlcks ); r++ ) {
-						QString nodeName = kf.string( iCtrlBlcks.child( r, 0 ), "Node Name", false );
+						QString nodeName = kf.string( nif->index( r, 0, iCtrlBlcks ), "Node Name", false );
 
 						if ( nodeName.isEmpty() )
-							nodeName = kf.string( iCtrlBlcks.child( r, 0 ), "Target Name", false ); // 10.0.1.0
+							nodeName = kf.string( nif->index( r, 0, iCtrlBlcks ), "Target Name", false ); // 10.0.1.0
 
 						if ( nodeName.isEmpty() ) {
-							QModelIndex iNodeName = kf.getIndex( iCtrlBlcks.child( r, 0 ), "Node Name Offset" );
+							QModelIndex iNodeName = kf.getIndex( nif->index( r, 0, iCtrlBlcks ), "Node Name Offset" );
 							nodeName = iNodeName.sibling( iNodeName.row(), NifModel::ValueCol ).data( NifSkopeDisplayRole ).toString();
 						}
 
@@ -140,14 +140,14 @@ public:
 					int numSeq  = nif->get<int>( iCtrlManager, "Num Controller Sequences" );
 					nif->set<int>( iCtrlManager, "Num Controller Sequences", numSeq + 1 );
 					nif->updateArray( iCtrlManager, "Controller Sequences" );
-					nif->setLink( nif->getIndex( iCtrlManager, "Controller Sequences" ).child( numSeq, 0 ), nSeq );
+					nif->setLink( nif->index( numSeq, 0, nif->getIndex( iCtrlManager, "Controller Sequences" ) ), nSeq );
 					QModelIndex iSeq = nif->getBlock( nSeq, "NiControllerSequence" );
 					nif->setLink( iSeq, "Manager", nif->getBlockNumber( iCtrlManager ) );
 
 					QModelIndex iCtrlBlcks = nif->getIndex( iSeq, "Controlled Blocks" );
 
 					for ( int r = 0; r < nif->rowCount( iCtrlBlcks ); r++ ) {
-						QModelIndex iCtrlBlck = iCtrlBlcks.child( r, 0 );
+						QModelIndex iCtrlBlck = nif->index( r, 0, iCtrlBlcks );
 
 						if ( nif->getLink( iCtrlBlck, "Controller" ) == -1 )
 							nif->setLink( iCtrlBlck, "Controller", iMultiTransformerIdx );
@@ -274,7 +274,7 @@ public:
 			int r;
 
 			for ( r = 0; r < nif->rowCount( iArray ); r++ ) {
-				if ( nif->get<QString>( iArray.child( r, 0 ), "Name" ) == name )
+				if ( nif->get<QString>( nif->index( r, 0, iArray ), "Name" ) == name )
 					break;
 			}
 
@@ -286,8 +286,8 @@ public:
 		nif->set<int>( iNum, r + blocksToAdd.count() );
 		nif->updateArray( iArray );
 		for ( const QPersistentModelIndex& idx : blocksToAdd ) {
-			nif->set<QString>( iArray.child( r, 0 ), "Name", nif->get<QString>( idx, "Name" ) );
-			nif->setLink( iArray.child( r, 0 ), "AV Object", nif->getBlockNumber( idx ) );
+			nif->set<QString>( nif->index( r, 0, iArray ), "Name", nif->get<QString>( idx, "Name" ) );
+			nif->setLink( nif->index( r, 0, iArray ), "AV Object", nif->getBlockNumber( idx ) );
 			r++;
 		}
 	}
@@ -327,7 +327,7 @@ public:
 
 	    for( int i = 0; i < 3; i++ )
 	    {
-	        QModelIndex iRot = iRots.child( i, 0 );
+	        QModelIndex iRot = nif->index( i, 0, iRots );
 	        nif->set<int>( iRot, "Num Keys", nif->get<int>(index, "Num Rotation Keys") );
 	        nif->set<int>( iRot, "Interpolation", rotationType );
 	        nif->updateArray( iRot, "Keys" );
@@ -335,7 +335,7 @@ public:
 
 	    for ( int q = 0; q < nif->rowCount( iQuats ); q++ )
 	    {
-	        QModelIndex iQuat = iQuats.child( q, 0 );
+	        QModelIndex iQuat = nif->index( q, 0, iQuats );
 
 	        float time = nif->get<float>( iQuat, "Time" );
 	        Quat value = nif->get<Quat>( iQuat, "Value" );
@@ -346,9 +346,9 @@ public:
 	        float x, y, z;
 	        tlocal.toEuler( x, y, z );
 
-	        QModelIndex xRot = iRots.child( 0, 0 );
-	        QModelIndex yRot = iRots.child( 1, 0 );
-	        QModelIndex zRot = iRots.child( 2, 0 );
+	        QModelIndex xRot = nif->index( 0, 0, iRots );
+	        QModelIndex yRot = nif->index( 1, 0, iRots );
+	        QModelIndex zRot = nif->index( 2, 0, iRots );
 
 	        xRot = nif->getIndex( xRot, "Keys" );
 
@@ -388,7 +388,7 @@ public:
 		auto objs = nif->getIndex( index, "Objs" );
 		auto numObjs = nif->rowCount( objs );
 		for ( int i = 0; i < numObjs; i++ ) {
-			auto c = objs.child( i, 0 );
+			auto c = nif->index( i, 0, objs );
 			auto iAV = nif->getIndex( c, "AV Object" );
 
 

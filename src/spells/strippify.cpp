@@ -54,7 +54,7 @@ class spStrippify final : public Spell
 		int skip = 0;
 
 		for ( int t = 0; t < nif->rowCount( iTriangles ); t++ ) {
-			Triangle tri = nif->get<Triangle>( iTriangles.child( t, 0 ) );
+			Triangle tri = nif->get<Triangle>( nif->index( t, 0, iTriangles ) );
 
 			if ( tri[0] != tri[1] && tri[1] != tri[2] && tri[2] != tri[0] )
 				triangles.append( tri );
@@ -114,7 +114,7 @@ class spStrippify final : public Spell
 				nif->updateArray( iDstUV );
 
 				for ( int r = 0; r < nif->rowCount( iDstUV ); r++ ) {
-					copyArray<Vector2>( nif, iDstUV.child( r, 0 ), iSrcUV.child( r, 0 ) );
+					copyArray<Vector2>( nif, nif->index( r, 0, iDstUV ), nif->index( r, 0, iSrcUV ) );
 				}
 			}
 
@@ -125,7 +125,7 @@ class spStrippify final : public Spell
 				nif->updateArray( iDstUV );
 
 				for ( int r = 0; r < nif->rowCount( iDstUV ); r++ ) {
-					copyArray<Vector2>( nif, iDstUV.child( r, 0 ), iSrcUV.child( r, 0 ) );
+					copyArray<Vector2>( nif, nif->index( r, 0, iDstUV ), nif->index( r, 0, iSrcUV ) );
 				}
 			}
 
@@ -143,8 +143,8 @@ class spStrippify final : public Spell
 				nif->updateArray( iPoints );
 				int x = 0;
 				for ( const QVector<quint16>& strip : strips ) {
-					nif->set<int>( iLengths.child( x, 0 ), strip.count() );
-					QModelIndex iStrip = iPoints.child( x, 0 );
+					nif->set<int>( nif->index( x, 0, iLengths ), strip.count() );
+					QModelIndex iStrip = nif->index( x, 0, iPoints );
 					nif->updateArray( iStrip );
 					nif->setArray<quint16>( iStrip, strip );
 					x++;
@@ -179,10 +179,10 @@ class spStrippify final : public Spell
 			auto stripsA = strips.at(0);
 			if ( iLengths.isValid() && iPoints.isValid() ) {
 				nif->updateArray( iLengths );
-				nif->set<quint16>( iLengths.child( 0, 0 ), stripsA.count() );
+				nif->set<quint16>( nif->index( 0, 0, iLengths ), stripsA.count() );
 				nif->updateArray( iPoints );
-				nif->updateArray( iPoints.child( 0, 0 ) );
-				nif->setArray<quint16>( iPoints.child( 0, 0 ), stripsA );
+				nif->updateArray( nif->index( 0, 0, iPoints ) );
+				nif->setArray<quint16>( nif->index( 0, 0, iPoints ), stripsA );
 				nif->set<quint16>( iStripData, "Num Triangles", stripsA.count() - 2 );
 			}
 			
@@ -196,10 +196,10 @@ class spStrippify final : public Spell
 			auto stripsB = strips.at(1);
 			if ( iLengths.isValid() && iPoints.isValid() ) {
 				nif->updateArray( iLengths );
-				nif->set<quint16>( iLengths.child( 0, 0 ), stripsB.count() );
+				nif->set<quint16>( nif->index( 0, 0, iLengths ), stripsB.count() );
 				nif->updateArray( iPoints );
-				nif->updateArray( iPoints.child( 0, 0 ) );
-				nif->setArray<quint16>( iPoints.child( 0, 0 ), stripsB );
+				nif->updateArray( nif->index( 0, 0, iPoints ) );
+				nif->setArray<quint16>( nif->index( 0, 0, iPoints ), stripsB );
 				nif->set<quint16>( iStrip2Data, "Num Triangles", stripsB.count() - 2 );
 			}
 		}
@@ -273,10 +273,10 @@ class spTriangulate final : public Spell
 
 		for ( int s = 0; s < nif->rowCount( iPoints ); s++ ) {
 			QVector<quint16> strip;
-			QModelIndex iStrip = iPoints.child( s, 0 );
+			QModelIndex iStrip = nif->index( s, 0, iPoints );
 
 			for ( int p = 0; p < nif->rowCount( iStrip ); p++ )
-				strip.append( nif->get<int>( iStrip.child( p, 0 ) ) );
+				strip.append( nif->get<int>( nif->index( p, 0, iStrip ) ) );
 
 			strips.append( strip );
 		}
@@ -314,7 +314,7 @@ class spTriangulate final : public Spell
 				nif->updateArray( iDstUV );
 
 				for ( int r = 0; r < nif->rowCount( iDstUV ); r++ ) {
-					copyArray<Vector2>( nif, iDstUV.child( r, 0 ), iSrcUV.child( r, 0 ) );
+					copyArray<Vector2>( nif, nif->index( r, 0, iDstUV ), nif->index( r, 0, iSrcUV ) );
 				}
 			}
 
@@ -325,7 +325,7 @@ class spTriangulate final : public Spell
 				nif->updateArray( iDstUV );
 
 				for ( int r = 0; r < nif->rowCount( iDstUV ); r++ ) {
-					copyArray<Vector2>( nif, iDstUV.child( r, 0 ), iSrcUV.child( r, 0 ) );
+					copyArray<Vector2>( nif, nif->index( r, 0, iDstUV ), nif->index( r, 0, iSrcUV ) );
 				}
 			}
 
@@ -420,7 +420,7 @@ public:
 		QList<QVector<quint16> > strips;
 
 		for ( int r = 0; r < nif->rowCount( iPoints ); r++ )
-			strips += nif->getArray<quint16>( iPoints.child( r, 0 ) );
+			strips += nif->getArray<quint16>( nif->index( r, 0, iPoints ) );
 
 		if ( strips.isEmpty() )
 			return index;
@@ -438,10 +438,10 @@ public:
 
 		nif->set<int>( iData, "Num Strips", 1 );
 		nif->updateArray( iLength );
-		nif->set<int>( iLength.child( 0, 0 ), strip.size() );
+		nif->set<int>( nif->index( 0, 0, iLength ), strip.size() );
 		nif->updateArray( iPoints );
-		nif->updateArray( iPoints.child( 0, 0 ) );
-		nif->setArray<quint16>( iPoints.child( 0, 0 ), strip );
+		nif->updateArray( nif->index( 0, 0, iPoints ) );
+		nif->setArray<quint16>( nif->index( 0, 0, iPoints ), strip );
 
 		return index;
 	}
@@ -471,7 +471,7 @@ public:
 		if ( !( iLength.isValid() && iPoints.isValid() ) )
 			return index;
 
-		QVector<quint16> strip = nif->getArray<quint16>( iPoints.child( 0, 0 ) );
+		QVector<quint16> strip = nif->getArray<quint16>( nif->index( 0, 0, iPoints ) );
 
 		if ( strip.size() <= 3 )
 			return index;
@@ -513,9 +513,9 @@ public:
 		nif->updateArray( iPoints );
 
 		for ( int r = 0; r < strips.count(); r++ ) {
-			nif->set<int>( iLength.child( r, 0 ), strips[r].size() );
-			nif->updateArray( iPoints.child( r, 0 ) );
-			nif->setArray<quint16>( iPoints.child( r, 0 ), strips[r] );
+			nif->set<int>( nif->index( r, 0, iLength ), strips[r].size() );
+			nif->updateArray( nif->index( r, 0, iPoints ) );
+			nif->setArray<quint16>( nif->index( r, 0, iPoints ), strips[r] );
 		}
 
 		return index;

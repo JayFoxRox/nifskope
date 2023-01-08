@@ -17,6 +17,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QListView>
+#include <QPainter>
 #include <QPushButton>
 #include <QSettings>
 #include <QStringListModel>
@@ -620,7 +621,7 @@ class spTextureTemplate final : public Spell
 		settings.setValue( k( "Wire Color" ), colorARGB );
 
 		// get the selected coord set
-		QModelIndex iSet = iUVs.child( set->currentIndex(), 0 );
+		QModelIndex iSet = nif->index( set->currentIndex(), 0, iUVs );
 
 		QVector<Vector2> uv;
 		QVector<Triangle> tri;
@@ -642,7 +643,7 @@ class spTextureTemplate final : public Spell
 				auto numParts = nif->get<int>( iPartBlock, "Num Skin Partition Blocks" );
 				auto iParts = nif->getIndex( iPartBlock, "Partition" );
 				for ( int i = 0; i < numParts; i++ )
-					tri << nif->getArray<Triangle>( iParts.child( i, 0 ), "Triangles" );
+					tri << nif->getArray<Triangle>( nif->index( i, 0, iParts ), "Triangles" );
 
 			} else {
 				iVertData = nif->getIndex( index, "Vertex Data" );
@@ -664,7 +665,7 @@ class spTextureTemplate final : public Spell
 			QVector<QVector<quint16> > strips;
 
 			for ( int r = 0; r < nif->rowCount( iPoints ); r++ )
-				strips.append( nif->getArray<quint16>( iPoints.child( r, 0 ) ) );
+				strips.append( nif->getArray<quint16>( nif->index( r, 0, iPoints ) ) );
 
 			tri = triangulate( strips );
 		} else if ( nif->getUserVersion2() < 100 ) {
@@ -813,7 +814,7 @@ public:
 
 		if ( iChildren.isValid() ) {
 			for ( int c = 0; c < nif->rowCount( iChildren ); c++ ) {
-				qint32 link = nif->getLink( iChildren.child( c, 0 ) );
+				qint32 link = nif->getLink( nif->index( c, 0, iChildren ) );
 
 				if ( lChildren.contains( link ) ) {
 					QModelIndex iChild = nif->getBlock( link );
@@ -826,7 +827,7 @@ public:
 
 		if ( iProperties.isValid() ) {
 			for ( int p = 0; p < nif->rowCount( iProperties ); p++ ) {
-				QModelIndex iProp = nif->getBlock( nif->getLink( iProperties.child( p, 0 ) ) );
+				QModelIndex iProp = nif->getBlock( nif->getLink( nif->index( p, 0, iProperties ) ) );
 				replaceApplyMode( nif, iProp, rep, by );
 			}
 		}
@@ -1035,7 +1036,7 @@ TexFlipDialog::TexFlipDialog( NifModel * n, QModelIndex & index, QWidget * paren
 
 	// texture action group; see options.cpp
 	QButtonGroup * actgrp = new QButtonGroup( this );
-	connect( actgrp, static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked), this, &TexFlipDialog::textureAction );
+	//FIXME: connect( actgrp, static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked), this, &TexFlipDialog::textureAction );
 	int btnid = 0;
 	for ( const QString& tfaname : QStringList{
 			Spell::tr( "Add Textures" ), Spell::tr( "Remove Texture" ),
@@ -1140,7 +1141,7 @@ void TexFlipDialog::listFromNif()
 	QStringList sourceFiles;
 
 	for ( int i = 0; i < numSources; i++ ) {
-		QModelIndex source = nif->getBlock( nif->getLink( sources.child( i, 0 ) ) );
+		QModelIndex source = nif->getBlock( nif->getLink( nif->index( i, 0, sources ) ) );
 		sourceFiles << nif->get<QString>( source, "File Name" );
 	}
 
@@ -1188,9 +1189,9 @@ public:
 			int num = nif->get<int>( flipController, "Num Sources" );
 			for ( int i = size; i < num; i++ ) {
 				Message::append( tr( "Found %1 textures, have %2" ).arg( size ).arg( num ),
-					tr( "Deleting %1" ).arg( nif->getLink( sources.child( i, 0 ) ) ), QMessageBox::Information
+					tr( "Deleting %1" ).arg( nif->getLink( nif->index( i, 0, sources ) ) ), QMessageBox::Information
 				);
-				nif->removeNiBlock( nif->getLink( sources.child( i, 0 ) ) );
+				nif->removeNiBlock( nif->getLink( nif->index( i, 0, sources ) ) );
 			}
 		}
 
@@ -1201,11 +1202,11 @@ public:
 			QString name = TexCache::stripPath( flipNames.at( i ), nif->getFolder() );
 			QModelIndex sourceTex;
 
-			if ( nif->getLink( sources.child( i, 0 ) ) == -1 ) {
+			if ( nif->getLink( nif->index( i, 0, sources ) ) == -1 ) {
 				sourceTex = nif->insertNiBlock( "NiSourceTexture", nif->getBlockNumber( flipController ) + i + 1 );
-				nif->setLink( sources.child( i, 0 ), nif->getBlockNumber( sourceTex ) );
+				nif->setLink( nif->index( i, 0, sources ), nif->getBlockNumber( sourceTex ) );
 			} else {
-				sourceTex = nif->getBlock( nif->getLink( sources.child( i, 0 ) ) );
+				sourceTex = nif->getBlock( nif->getLink( nif->index( i, 0, sources ) ) );
 			}
 
 			nif->set<QString>( sourceTex, "File Name", name );

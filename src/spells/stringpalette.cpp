@@ -362,7 +362,7 @@ public:
 				offsetMap.insert( oldOffsets[i], -1 );
 			} else {
 				offsetMap.insert( oldOffsets[i], x );
-				bytes += s;
+				bytes.append( (const char*)s.data() );
 				bytes.append( '\0' );
 				x += ( s.length() + 1 );
 			}
@@ -407,23 +407,23 @@ public:
 			QPersistentModelIndex blocks = nif->getIndex( nextBlock, "Controlled Blocks" );
 
 			for ( int i = 0; i < nif->rowCount( blocks ); i++ ) {
-				QPersistentModelIndex thisBlock = blocks.child( i, 0 );
+				QPersistentModelIndex thisBlock = nif->index( i, 0, blocks );
 
 				for ( int j = 0; j < nif->rowCount( thisBlock ); j++ ) {
-					if ( nif->getValue( thisBlock.child( j, 0 ) ).type() == NifValue::tStringOffset ) {
+					if ( nif->getValue( nif->index( j, 0, thisBlock ) ).type() == NifValue::tStringOffset ) {
 						// we shouldn't ever exceed the limit of an int, even though the type
 						// is properly a uint
-						int oldValue = nif->get<int>( thisBlock.child( j, 0 ) );
-						qDebug() << "Index " << thisBlock.child( j, 0 )
+						int oldValue = nif->get<int>( nif->index( j, 0, thisBlock ) );
+						qDebug() << "Index " << nif->index( j, 0, thisBlock )
 						           << " is a string offset with name "
-						           << nif->itemName( thisBlock.child( j, 0 ) )
+						           << nif->itemName( nif->index( j, 0, thisBlock ) )
 						           << " and value "
-						           << nif->get<int>( thisBlock.child( j, 0 ) );
+						           << nif->get<int>( nif->index( j, 0, thisBlock ) );
 
 
 						if ( oldValue != -1 ) {
 							int newValue = offsetMap.value( oldValue );
-							nif->set<int>( thisBlock.child( j, 0 ), newValue );
+							nif->set<int>( nif->index( j, 0, thisBlock ), newValue );
 							numRefsUpdated++;
 						}
 					}

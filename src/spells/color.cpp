@@ -54,12 +54,12 @@ public:
 
 	bool isApplicable( const NifModel * nif, const QModelIndex & index ) override final
 	{
-		return nif->isArray( index ) && nif->getValue( index.child( 0, 0 ) ).isColor();
+		return nif->isArray( index ) && nif->getValue( nif->index( 0, 0, index ) ).isColor();
 	}
 
 	QModelIndex cast( NifModel * nif, const QModelIndex & index ) override final
 	{
-		QModelIndex colorIdx = (nif->isArray( index )) ? index.child( 0, 0 ) : index;
+		QModelIndex colorIdx = (nif->isArray( index )) ? nif->index( 0, 0, index ) : index;
 
 		auto typ = nif->getValue( colorIdx ).type();
 		if ( typ == NifValue::tColor3 )
