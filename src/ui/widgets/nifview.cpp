@@ -131,7 +131,8 @@ void NifTreeView::setAllExpanded( const QModelIndex & index, bool e )
 
 QStyleOptionViewItem NifTreeView::viewOptions() const
 {
-	QStyleOptionViewItem opt = QTreeView::viewOptions();
+	QStyleOptionViewItem opt;
+	QTreeView::initViewItemOption(&opt);
 	opt.showDecorationSelected = true;
 	return opt;
 }
@@ -261,7 +262,7 @@ void NifTreeView::pasteArray()
 	ChangeValueCommand::createTransaction();
 	nif->setState( BaseModel::Processing );
 	for ( int i = 0; i < cnt && i < valueClipboard->getValues().size(); i++ ) {
-		auto iDest = root.child( i, NifModel::ValueCol );
+		auto iDest = nif->index( i, NifModel::ValueCol, root );
 		auto srcValue = valueClipboard->getValues().at( iDest.row() );
 
 		pasteTo( iDest, srcValue );
@@ -269,7 +270,7 @@ void NifTreeView::pasteArray()
 	nif->restoreState();
 
 	if ( cnt > 0 )
-		emit nif->dataChanged( root.child( 0, NifModel::ValueCol ), root.child( cnt - 1, NifModel::ValueCol ) );
+		emit nif->dataChanged( nif->index( 0, NifModel::ValueCol, root ), nif->index( cnt - 1, NifModel::ValueCol, root ) );
 }
 
 void NifTreeView::drawBranches( QPainter * painter, const QRect & rect, const QModelIndex & index ) const
@@ -398,7 +399,7 @@ void NifTreeView::keyPressEvent( QKeyEvent * e )
 				nif->setData( newValue, v );
 
 				// Change the selected row
-				selectionModel()->select( parent.child( row, 0 ), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows );
+				selectionModel()->select( nif->index( row, 0, parent ), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows );
 
 				// Add row swap to undo
 				ChangeValueCommand::createTransaction();
@@ -408,7 +409,7 @@ void NifTreeView::keyPressEvent( QKeyEvent * e )
 		}
 	}
 
-	SpellPtr spell = SpellBook::lookup( QKeySequence( e->modifiers() + e->key() ) );
+	SpellPtr spell = nullptr; //FIXME: SpellBook::lookup( QKeySequence( e->modifiers() + e->key() ) );
 
 	if ( spell ) {
 		QPersistentModelIndex oldidx;
@@ -485,7 +486,7 @@ void NifTreeView::currentChanged( const QModelIndex & current, const QModelIndex
 		if ( mdl->inherits( current, "NiTransformInterpolator" ) 
 			 || mdl->inherits( current, "NiBSplineTransformInterpolator" ) ) {
 			// Auto-Expand NiQuatTransform
-			autoExpand( current.child( 0, 0 ) );
+			autoExpand( nif->index( 0, 0, current ) );
 		} else if ( mdl->inherits( current, "NiNode" ) ) {
 			// Auto-Expand Children array
 			auto iChildren = mdl->getIndex( current, "Children" );
@@ -493,11 +494,11 @@ void NifTreeView::currentChanged( const QModelIndex & current, const QModelIndex
 				autoExpand( iChildren );
 		} else if ( mdl->inherits( current, "NiSkinPartition" ) ) {
 			// Auto-Expand skin partitions array
-			autoExpand( current.child( 1, 0 ) );
-		} else if ( mdl->getValue( current.child( cnt - 1, 0 ) ).type() == NifValue::tNone
-					&& mdl->rowCount( current.child( cnt - 1, 0 ) ) < ARRAY_LIMIT ) {
+			autoExpand( nif->index( 1, 0, current ) );
+		} else if ( mdl->getValue( nif->index( cnt - 1, 0, current ) ).type() == NifValue::tNone
+					&& mdl->rowCount( nif->index( cnt - 1, 0, current ) ) < ARRAY_LIMIT ) {
 			// Auto-Expand final arrays/compounds
-			autoExpand( current.child( cnt - 1, 0 ) );
+			autoExpand( nif->index( cnt - 1, 0, current ) );
 		}
 	}
 

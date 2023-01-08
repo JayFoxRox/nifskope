@@ -35,7 +35,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "data/niftypes.h"
 
-#include <QGLWidget> // Inherited
+#include <QOpenGLWidget> // Inherited
 #include <QDialog>   // Inherited
 #include <QModelIndex>
 #include <QPointer>
@@ -56,7 +56,7 @@ class QUndoStack;
 #undef None // conflicts with Qt
 
 //! Displays and allows editing of UV coordinate data
-class UVWidget final : public QGLWidget
+class UVWidget final : public QOpenGLWidget
 {
 	Q_OBJECT
 

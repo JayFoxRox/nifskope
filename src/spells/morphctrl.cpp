@@ -50,23 +50,23 @@ public:
 				qCWarning( nsSpell ) << Spell::tr( "overriding base key frame, all other frames will be cleared" );
 				nif->set<int>( iMorphData, "Num Vertices", nif->get<int>( iMeshData, "Num Vertices" ) );
 				QVector<Vector3> verts = nif->getArray<Vector3>( iMeshData, "Vertices" );
-				nif->updateArray( iFrames.child( 0, 0 ), "Vectors" );
-				nif->setArray( iFrames.child( 0, 0 ), "Vectors", verts );
+				nif->updateArray( nif->index( 0, 0, iFrames ), "Vectors" );
+				nif->setArray( nif->index( 0, 0, iFrames ), "Vectors", verts );
 				verts.fill( Vector3() );
 
 				for ( int f = 1; f < nif->rowCount( iFrames ); f++ ) {
-					nif->updateArray( iFrames.child( f, 0 ), "Vectors" );
-					nif->setArray<Vector3>( iFrames.child( f, 0 ), "Vectors", verts );
+					nif->updateArray( nif->index( f, 0, iFrames ), "Vectors" );
+					nif->setArray<Vector3>( nif->index( f, 0, iFrames ), "Vectors", verts );
 				}
 			} else {
 				QVector<Vector3> verts = nif->getArray<Vector3>( iMeshData, "Vertices" );
-				QVector<Vector3> base  = nif->getArray<Vector3>( iFrames.child( 0, 0 ), "Vectors" );
+				QVector<Vector3> base  = nif->getArray<Vector3>( nif->index( 0, 0, iFrames ), "Vectors" );
 				QVector<Vector3> frame( base.count(), Vector3() );
 
 				for ( int n = 0; n < base.count(); n++ )
 					frame[ n ] = verts.value( n ) - base[ n ];
 
-				nif->setArray<Vector3>( iFrames.child( selFrame, 0 ), "Vectors", frame );
+				nif->setArray<Vector3>( nif->index( selFrame, 0, iFrames ), "Vectors", frame );
 			}
 		}
 
@@ -111,7 +111,7 @@ public:
 			QStringList list;
 
 			for ( int i = 0; i < nif->rowCount( iFrames ); i++ ) {
-				list << nif->get<QString>( iFrames.child( i, 0 ), "Frame Name" );
+				list << nif->get<QString>( nif->index( i, 0, iFrames ), "Frame Name" );
 			}
 
 			return list;

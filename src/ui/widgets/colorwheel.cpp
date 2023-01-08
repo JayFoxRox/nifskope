@@ -42,6 +42,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
+#include <QMatrix4x4>
 #include <QPainter>
 #include <QPixmap>
 #include <QPushButton>
@@ -212,7 +213,7 @@ void ColorWheel::paintEvent( QPaintEvent * e )
 	QPainter p( this );
 	p.translate( width() / 2, height() / 2 );
 	p.setRenderHint( QPainter::Antialiasing );
-	p.setRenderHint( QPainter::HighQualityAntialiasing );
+	//FIXME: p.setRenderHint( QPainter::HighQualityAntialiasing );
 
 	p.setPen( Qt::NoPen );
 
@@ -226,7 +227,7 @@ void ColorWheel::paintEvent( QPaintEvent * e )
 
 	p.setBrush( QBrush( cgrad ) );
 	p.drawEllipse( QRectF( -s, -s, s * 2, s * 2 ) );
-	p.setBrush( palette().color( QPalette::Background ) );
+	p.setBrush( palette().color( QPalette::Base ) );
 	p.drawEllipse( QRectF( -c, -c, c * 2, c * 2 ) );
 
 	double x = ( H - 0.5 ) * 2 * M_PI;
@@ -342,7 +343,7 @@ void ColorWheel::setColor( int x, int y )
 {
 	if ( pressed == Circle ) {
 		QLineF l( QPointF( width() / 2.0, height() / 2.0 ), QPointF( x, y ) );
-		H = l.angle( QLineF( 0, 1, 0, 0 ) ) / 360.0;
+		H = l.angleTo( QLineF( 0, 1, 0, 0 ) ) / 360.0;
 
 		if ( l.dx() > 0 )
 			H = 1.0 - H;
@@ -353,8 +354,8 @@ void ColorWheel::setColor( int x, int y )
 	} else if ( pressed == Triangle ) {
 		QPointF mp( x - width() / 2, y - height() / 2 );
 
-		QMatrix m;
-		m.rotate( (H ) * 360.0 + 120 );
+		QMatrix4x4 m;
+		m.rotate( (H ) * 360.0 + 120, 0.0, 0.0, 1.0 );
 		QPointF p( m.map( mp ) );
 		double c = qMin( width(), height() ) / 2.0;
 		c -= c / 5;

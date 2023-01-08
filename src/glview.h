@@ -35,7 +35,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gl/glscene.h"
 
-#include <QGLWidget> // Inherited
+#include <QOpenGLWidget> // Inherited
 #include <QGraphicsView>
 #include <QDateTime>
 #include <QPersistentModelIndex>
@@ -56,7 +56,7 @@ class QTimer;
 
 
 //! The main [Viewport](@ref viewport_details) class
-class GLView final : public QGLWidget
+class GLView final : public QOpenGLWidget
 {
 	Q_OBJECT
 
@@ -64,7 +64,7 @@ class GLView final : public QGLWidget
 	friend class GLGraphicsView;
 
 private:
-	GLView( const QGLFormat & format, QWidget * parent, const QGLWidget * shareWidget = 0 );
+	GLView( const QGLFormat & format, QWidget * parent, const QOpenGLWidget * shareWidget = 0 );
 	~GLView();
 
 public:

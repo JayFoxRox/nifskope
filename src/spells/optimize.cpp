@@ -447,8 +447,8 @@ public:
 		QModelIndex iUVb = nif->getIndex( iDataB, "UV Sets" );
 
 		for ( int r = 0; r < nif->rowCount( iUVa ); r++ ) {
-			nif->updateArray( iUVa.child( r, 0 ) );
-			nif->setArray<Vector2>( iUVa.child( r, 0 ), nif->getArray<Vector2>( iUVa.child( r, 0 ) ).mid( 0, numA ) + nif->getArray<Vector2>( iUVb.child( r, 0 ) ) );
+			nif->updateArray( nif->index( r, 0, iUVa ) );
+			nif->setArray<Vector2>( nif->index( r, 0, iUVa ), nif->getArray<Vector2>( nif->index( r, 0, iUVa ) ).mid( 0, numA ) + nif->getArray<Vector2>( nif->index( r, 0, iUVb ) ) );
 		}
 
 		int triCntA = nif->get<int>( iDataA, "Num Triangles" );
@@ -477,15 +477,15 @@ public:
 		nif->updateArray( iDataA, "Points" );
 
 		for ( int r = 0; r < stripCntB; r++ ) {
-			QVector<quint16> strip = nif->getArray<quint16>( nif->getIndex( iDataB, "Points" ).child( r, 0 ) );
+			QVector<quint16> strip = nif->getArray<quint16>( nif->index( r, 0, nif->getIndex( iDataB, "Points" ) ) );
 			QMutableVectorIterator<quint16> it( strip );
 
 			while ( it.hasNext() )
 				it.next() += numA;
 
-			nif->set<int>( nif->getIndex( iDataA, "Strip Lengths" ).child( r + stripCntA, 0 ), strip.size() );
-			nif->updateArray( nif->getIndex( iDataA, "Points" ).child( r + stripCntA, 0 ) );
-			nif->setArray<quint16>( nif->getIndex( iDataA, "Points" ).child( r + stripCntA, 0 ), strip );
+			nif->set<int>( nif->index( r + stripCntA, 0, nif->getIndex( iDataA, "Strip Lengths" ) ), strip.size() );
+			nif->updateArray( nif->index( r + stripCntA, 0, nif->getIndex( iDataA, "Points" ) ) );
+			nif->setArray<quint16>( nif->index( r + stripCntA, 0, nif->getIndex( iDataA, "Points" ) ), strip );
 		}
 
 		spUpdateCenterRadius CenterRadius;
@@ -499,7 +499,7 @@ REGISTER_SPELL( spCombiTris )
 void scan( const QModelIndex & idx, NifModel * nif, QMap<QString, qint32> & usedStrings, bool hasCED )
 {
 	for ( int i = 0; i < nif->rowCount( idx ); i++ ) {
-		auto child = idx.child( i, 2 );
+		auto child = nif->index( i, 2, idx );
 		if ( nif->rowCount( child ) > 0 ) {
 			scan( child, nif, usedStrings, hasCED );
 			continue;
